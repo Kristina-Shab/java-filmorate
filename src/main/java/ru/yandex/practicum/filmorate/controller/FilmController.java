@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -9,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
@@ -22,49 +24,64 @@ public class FilmController {
 
     @PostMapping
     public Film create(@RequestBody Film film) {
+        log.info("Создание фильма {}", film.getName());
         if (film.getName() == null || film.getName().isBlank()) {
+            log.warn("Ошибка валидации при создании: пустое название фильма");
             throw new ValidationException("Название не может быть пустым");
         }
-        if (film.getDescription().length() > 200) {
+        if (film.getDescription() != null && film.getDescription().length() > 200) {
+            log.warn("Ошибка валидации при создании: длина описания {} превышает допустимую", film.getDescription().length());
             throw new ValidationException("Максимальная длина описания — 200 символов");
         }
-        if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
+        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
+            log.warn("Ошибка валидации при создании: дата релиза {} раньше допустимой", film.getReleaseDate());
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
         if (film.getDuration() <= 0) {
+            log.warn("Ошибка валидации при создании: продолжительность {} <= 0", film.getDuration());
             throw new ValidationException("Продолжительность фильма должна быть положительным числом");
         }
         film.setId(getNextId());
-
         films.put(film.getId(), film);
+        log.info("Фильм создан и добавлен в библиотеку");
+        log.debug("Детали добавленного фильма: {}", film);
         return film;
     }
 
     @PutMapping
     public Film update(@RequestBody Film newFilm) {
         if (newFilm.getId() == null) {
+            log.warn("Не указан id для обновления");
             throw new ValidationException("Id должен быть указан");
         }
         if (films.containsKey(newFilm.getId())) {
+            log.info("Обновление фильма с id {}", newFilm.getId());
             Film oldFilm = films.get(newFilm.getId());
             if (newFilm.getName() == null || newFilm.getName().isBlank()) {
+                log.warn("Ошибка валидации при обновлении: пустое название фильма");
                 throw new ValidationException("Название не может быть пустым");
             }
-            if (newFilm.getDescription().length() > 200) {
+            if (newFilm.getDescription() != null && newFilm.getDescription().length() > 200) {
+                log.warn("Ошибка валидации при обновлении: длина описания {} превышает допустимую", newFilm.getDescription().length());
                 throw new ValidationException("Максимальная длина описания — 200 символов");
             }
-            if (newFilm.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
+            if (newFilm.getReleaseDate() == null || newFilm.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
+                log.warn("Ошибка валидации при обновлении: дата релиза {} раньше допустимой", newFilm.getReleaseDate());
                 throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
             }
             if (newFilm.getDuration() <= 0) {
+                log.warn("Ошибка валидации при обновлении: продолжительность {} <= 0", newFilm.getDuration());
                 throw new ValidationException("Продолжительность фильма должна быть положительным числом");
             }
             oldFilm.setName(newFilm.getName());
             oldFilm.setDescription(newFilm.getDescription());
             oldFilm.setReleaseDate(newFilm.getReleaseDate());
             oldFilm.setDuration(newFilm.getDuration());
+            log.info("Фильм обновлен");
+            log.debug("Детали обновленного фильма: {}", oldFilm);
             return oldFilm;
         }
+        log.warn("Фильм с id {} не найден для обновления", newFilm.getId());
         throw new ValidationException("Фильм с id = " + newFilm.getId() + " не найден");
     }
 
