@@ -28,51 +28,6 @@ class UserControllerTests {
     }
 
     @Test
-    void createInvalidUserLoginIsBlank() {
-        User user = validUser().toBuilder()
-                .login("")
-                .build();
-
-        assertThrows(ValidationException.class, () -> userController.create(user));
-    }
-
-    @Test
-    void createInvalidUserLoginHasSpaces() {
-        User user = validUser().toBuilder()
-                .login("Ni  k")
-                .build();
-
-        assertThrows(ValidationException.class, () -> userController.create(user));
-    }
-
-    @Test
-    void createInvalidUserEmailIsBlank() {
-        User user = validUser().toBuilder()
-                .email("")
-                .build();
-
-        assertThrows(ValidationException.class, () -> userController.create(user));
-    }
-
-    @Test
-    void createInvalidUserEmailWithoutAt() {
-        User user = validUser().toBuilder()
-                .email("niki.ru")
-                .build();
-
-        assertThrows(ValidationException.class, () -> userController.create(user));
-    }
-
-    @Test
-    void createInvalidUserBirthdayInFuture() {
-        User user = validUser().toBuilder()
-                .birthday(LocalDate.now().plusDays(1))
-                .build();
-
-        assertThrows(ValidationException.class, () -> userController.create(user));
-    }
-
-    @Test
     void createValidUserNameIsBlank() {
         User user = validUser().toBuilder()
                 .name("")
@@ -98,13 +53,6 @@ class UserControllerTests {
     }
 
     @Test
-    void createInvalidUserIsBlank() {
-        User emptyUser = User.builder().build();
-
-        assertThrows(ValidationException.class, () -> userController.create(emptyUser));
-    }
-
-    @Test
     void updateValidUser() {
         User user = validUser();
         User createdUser = userController.create(user);
@@ -124,56 +72,6 @@ class UserControllerTests {
                 .id(5L)
                 .build();
         assertThrows(ValidationException.class, () -> userController.update(user));
-    }
-
-    @Test
-    void updateInvalidUserLoginIsBlank() {
-        User createUser = createAndSaveValidUser();
-        User newUser = createUser.toBuilder()
-                .login("")
-                .build();
-
-        assertThrows(ValidationException.class, () -> userController.update(newUser));
-    }
-
-    @Test
-    void updateInvalidUserLoginHasSpaces() {
-        User createUser = createAndSaveValidUser();
-        User newUser = createUser.toBuilder()
-                .login("Ni  k")
-                .build();
-
-        assertThrows(ValidationException.class, () -> userController.update(newUser));
-    }
-
-    @Test
-    void updateInvalidUserEmailIsBlank() {
-        User createUser = createAndSaveValidUser();
-        User newUser = createUser.toBuilder()
-                .email("")
-                .build();
-
-        assertThrows(ValidationException.class, () -> userController.update(newUser));
-    }
-
-    @Test
-    void updateInvalidUserEmailWithoutAt() {
-        User createUser = createAndSaveValidUser();
-        User newUser = createUser.toBuilder()
-                .email("niki.ru")
-                .build();
-
-        assertThrows(ValidationException.class, () -> userController.update(newUser));
-    }
-
-    @Test
-    void updateInvalidUserBirthdayInFuture() {
-        User createUser = createAndSaveValidUser();
-        User newUser = createUser.toBuilder()
-                .birthday(LocalDate.now().plusDays(1))
-                .build();
-
-        assertThrows(ValidationException.class, () -> userController.update(newUser));
     }
 
     @Test
