@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,22 +20,20 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final Map<Long, Film> films = new HashMap<>();
+    private final InMemoryFilmStorage inMemoryFilmStorage;
 
+    public FilmController(InMemoryFilmStorage inMemoryFilmStorage) {
+        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    }
 
     @GetMapping
     public Collection<Film> findAll() {
-        return films.values();
+        return inMemoryFilmStorage.findAll();
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        log.info("Создание фильма {}", film.getName());
-        film.setId(getNextId());
-        films.put(film.getId(), film);
-        log.info("Фильм создан и добавлен в библиотеку");
-        log.debug("Детали добавленного фильма: {}", film);
-        return film;
+        return inMemoryFilmStorage.create(film);
     }
 
     @PutMapping
@@ -43,27 +42,8 @@ public class FilmController {
             log.warn("Не указан id для обновления");
             throw new ValidationException("Id должен быть указан");
         }
-        if (films.containsKey(newFilm.getId())) {
-            log.info("Обновление фильма с id {}", newFilm.getId());
-            Film oldFilm = films.get(newFilm.getId());
-            oldFilm.setName(newFilm.getName());
-            oldFilm.setDescription(newFilm.getDescription());
-            oldFilm.setReleaseDate(newFilm.getReleaseDate());
-            oldFilm.setDuration(newFilm.getDuration());
-            log.info("Фильм обновлен");
-            log.debug("Детали обновленного фильма: {}", oldFilm);
-            return oldFilm;
-        }
-        log.warn("Фильм с id {} не найден для обновления", newFilm.getId());
-        throw new ValidationException("Фильм с id = " + newFilm.getId() + " не найден");
+        return inMemoryFilmStorage.update(newFilm);
     }
 
-    private long getNextId() {
-        long currentMaxId = films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
-    }
+
 }
