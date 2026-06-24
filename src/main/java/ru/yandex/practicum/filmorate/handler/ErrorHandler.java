@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.handler;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -8,23 +9,27 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
+@Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidation(final ValidationException e) {
+        log.warn("Ошибка валидации: {}", e.getMessage());
         return new ErrorResponse("Ошибка валидации", e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFound(final NotFoundException e) {
+        log.warn("Ошибка поиска объекта: {}", e.getMessage());
         return new ErrorResponse("Ошибка поиска объекта", e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleAnyException(Exception e) {
+        log.error("Внутренняя ошибка сервера:", e);
         return new ErrorResponse("Произошла внутренняя ошибка сервера", e.getMessage());
     }
 
@@ -35,6 +40,7 @@ public class ErrorHandler {
                 .map(error -> error.getDefaultMessage())
                 .findFirst()
                 .orElse("Ошибка валидации");
+        log.warn("Ошибка валидации: {}", message);
         return new ErrorResponse("Ошибка валидации", message);
     }
 }
