@@ -9,20 +9,29 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
+    private final UserService userService;
 
-    public void addLike(Film film, User user) {
+    public Film addLike(Long filmId, Long userId) {
+        Film film = getFilmById(filmId);
+        User user = userService.getUserById(userId);
+
         if (film.getLikes().contains(user.getId())) {
             throw new ValidationException("Вы уже поставили лайк этому фильму");
         }
         film.getLikes().add(user.getId());
+        return film;
     }
 
-    public void removeLike(Film film, User user) {
+    public void removeLike(Long filmId, Long userId) {
+        Film film = getFilmById(filmId);
+        User user = userService.getUserById(userId);
+
         if (!film.getLikes().contains(user.getId())) {
             throw new ValidationException("Вы еще не ставили лайк этому фильму, поэтому его нельзя удалить");
         }
@@ -34,5 +43,14 @@ public class FilmService {
                 .sorted(Comparator.comparingInt((Film film) -> film.getLikes().size()).reversed())
                 .limit(count)
                 .toList();
+    }
+
+    public Optional<Film> findById (Long id){
+        return filmStorage.getFilm(id);
+    }
+
+    private Film getFilmById(Long id){
+        return filmStorage.getFilm(id)
+                .orElseThrow(() -> new ValidationException("Фильм с id " + id + " не найден"));
     }
 }

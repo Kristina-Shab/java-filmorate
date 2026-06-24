@@ -4,10 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -49,6 +51,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void delete(Film film) {
         films.remove(film.getId());
+    }
+
+    @Override
+    public Optional<Film> getFilm(long id) {
+        return Optional.ofNullable(films.get(id));
     }
 
     private long getNextId() {
