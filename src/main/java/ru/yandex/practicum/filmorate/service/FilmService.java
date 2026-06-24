@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -33,7 +34,7 @@ public class FilmService {
         User user = userService.getUserById(userId);
 
         if (!film.getLikes().contains(user.getId())) {
-            throw new ValidationException("Вы еще не ставили лайк этому фильму, поэтому его нельзя удалить");
+            throw new NotFoundException("Вы еще не ставили лайк этому фильму, поэтому его нельзя удалить");
         }
         film.getLikes().remove(user.getId());
     }
@@ -51,6 +52,6 @@ public class FilmService {
 
     private Film getFilmById(Long id){
         return filmStorage.getFilm(id)
-                .orElseThrow(() -> new ValidationException("Фильм с id " + id + " не найден"));
+                .orElseThrow(() -> new NotFoundException("Фильм с id " + id + " не найден"));
     }
 }
