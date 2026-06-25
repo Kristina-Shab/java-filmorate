@@ -57,11 +57,11 @@ public class FilmService {
                 .toList();
     }
 
-    public Optional<Film> findById (Long id){
+    public Optional<Film> findById(Long id) {
         return filmStorage.getFilm(id);
     }
 
-    private Film getFilmById(Long id){
+    private Film getFilmById(Long id) {
         return filmStorage.getFilm(id)
                 .orElseThrow(() -> new NotFoundException("Фильм с id " + id + " не найден"));
     }

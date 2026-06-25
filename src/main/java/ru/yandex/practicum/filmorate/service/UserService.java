@@ -31,7 +31,7 @@ public class UserService {
         user.getFriends().add(friend.getId());
         friend.getFriends().add(user.getId());
         log.info("Пользователь {} успешно добавлен в друзья к {}", friend.getLogin(), user.getLogin());
-        log.debug("Детали пользователя с новым другом: {}",user);
+        log.debug("Детали пользователя с новым другом: {}", user);
         return user;
     }
 
@@ -66,11 +66,11 @@ public class UserService {
                 .collect(Collectors.toSet());
     }
 
-    public Optional<User> findById (Long id){
+    public Optional<User> findById(Long id) {
         return userStorage.getUser(id);
     }
 
-    public User getUserById(Long id){
+    public User getUserById(Long id) {
         return userStorage.getUser(id)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + id + " не найден"));
     }

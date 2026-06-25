@@ -3,8 +3,12 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 
@@ -15,7 +19,9 @@ class UserControllerTests {
 
     @BeforeEach
     void setUp() {
-        userController = new UserController();
+        UserStorage userStorage = new InMemoryUserStorage();
+        UserService userService = new UserService(userStorage);
+        userController = new UserController(userStorage, userService);
     }
 
     @Test
@@ -71,7 +77,7 @@ class UserControllerTests {
         User user = validUser().toBuilder()
                 .id(5L)
                 .build();
-        assertThrows(ValidationException.class, () -> userController.update(user));
+        assertThrows(NotFoundException.class, () -> userController.update(user));
     }
 
     @Test
@@ -94,6 +100,49 @@ class UserControllerTests {
         assertThrows(ValidationException.class, () -> userController.update(newEmptyUser));
     }
 
+    @Test
+    void addFriendValidUsers() {
+        User user = createAndSaveValidUser();
+        User friend = createAndSaveValidUser();
+
+        User userWithFriends = userController.addFriend(user.getId(), friend.getId());
+        assertEquals(1, userController.findFriends(userWithFriends.getId()).size());
+    }
+
+    @Test
+    void addFriendInvalidUsersWhenUserAlreadyFriend() {
+        User user = createAndSaveValidUser();
+        User friend = createAndSaveValidUser();
+
+        userController.addFriend(user.getId(), friend.getId());
+        assertThrows(ValidationException.class, () -> userController.addFriend(user.getId(), friend.getId()));
+    }
+
+    @Test
+    void addFriendMultipleValidUsers() {
+        User user = createAndSaveValidUser();
+        User friend1 = createAndSaveValidUser();
+        User friend2 = createAndSaveValidUser();
+        User friend3 = createAndSaveValidUser();
+
+        userController.addFriend(user.getId(), friend1.getId());
+        userController.addFriend(user.getId(), friend2.getId());
+        User userWithFriends = userController.addFriend(user.getId(), friend3.getId());
+
+        assertEquals(3, userController.findFriends(userWithFriends.getId()).size());
+    }
+
+    @Test
+    void deleteFriend() {
+        User user = createAndSaveValidUser();
+        User friend = createAndSaveValidUser();
+
+        userController.addFriend(user.getId(), friend.getId());
+        userController.deleteFriend(user.getId(), friend.getId());
+
+        assertEquals(0, userController.findFriends(user.getId()).size());
+    }
+
     private User validUser() {
         return User.builder()
                 .login("Nik")
@@ -107,4 +156,6 @@ class UserControllerTests {
         User user = validUser();
         return userController.create(user);
     }
+
+
 }

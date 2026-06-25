@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,14 +15,14 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 public class ErrorHandler {
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidation(final ValidationException e) {
-        log.warn("Ошибка валидации: {}", e.getMessage());
+    public ErrorResponse handleValidation(ValidationException e) {
+        log.warn("Ошибка валидации: {}", e.getMessage(), e);
         return new ErrorResponse("Ошибка валидации", e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFound(final NotFoundException e) {
+    public ErrorResponse handleNotFound(NotFoundException e) {
         log.warn("Ошибка поиска объекта: {}", e.getMessage());
         return new ErrorResponse("Ошибка поиска объекта", e.getMessage());
     }
@@ -29,7 +30,7 @@ public class ErrorHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleAnyException(Exception e) {
-        log.error("Внутренняя ошибка сервера:", e);
+        log.error("Внутренняя ошибка сервера: {}", e.getMessage(), e);
         return new ErrorResponse("Произошла внутренняя ошибка сервера", e.getMessage());
     }
 
@@ -37,7 +38,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationErrors(MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getAllErrors().stream()
-                .map(error -> error.getDefaultMessage())
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .findFirst()
                 .orElse("Ошибка валидации");
         log.warn("Ошибка валидации: {}", message);
