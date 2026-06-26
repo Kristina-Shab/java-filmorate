@@ -20,6 +20,22 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserService userService;
 
+    public Collection<Film> findAll() {
+        return filmStorage.findAll();
+    }
+
+    public Film create(Film film) {
+        return filmStorage.create(film);
+    }
+
+    public Film update(Film newFilm) {
+        if (newFilm.getId() == null) {
+            log.warn("Не указан id для обновления");
+            throw new ValidationException("Id должен быть указан");
+        }
+        return filmStorage.update(newFilm);
+    }
+
     public Film addLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
         User user = userService.getUserById(userId);

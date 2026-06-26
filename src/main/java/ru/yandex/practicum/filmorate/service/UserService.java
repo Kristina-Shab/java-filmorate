@@ -18,6 +18,22 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserStorage userStorage;
 
+    public Collection<User> findAll() {
+        return userStorage.findAll();
+    }
+
+    public User create(User user) {
+        return userStorage.create(user);
+    }
+
+    public User update(User newUser) {
+        if (newUser.getId() == null) {
+            log.warn("Не указан id для обновления");
+            throw new ValidationException("Id должен быть указан");
+        }
+        return userStorage.update(newUser);
+    }
+
     public User addFriend(Long userId, Long friendId) {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
@@ -49,7 +65,7 @@ public class UserService {
     public Collection<User> getFriends(Long userId) {
         log.info("Получение всех друзей пользователя {}", userId);
         return getUserById(userId).getFriends().stream()
-                .map(userStorage::getUser)
+                .map(this::findById)
                 .flatMap(Optional::stream)
                 .collect(Collectors.toSet());
     }
@@ -61,7 +77,7 @@ public class UserService {
         log.info("Получение общих друзей пользователей {} и {}", user.getLogin(), otherUser.getLogin());
         return user.getFriends().stream()
                 .filter(otherUser.getFriends()::contains)
-                .map(userStorage::getUser)
+                .map(this::findById)
                 .flatMap(Optional::stream)
                 .collect(Collectors.toSet());
     }

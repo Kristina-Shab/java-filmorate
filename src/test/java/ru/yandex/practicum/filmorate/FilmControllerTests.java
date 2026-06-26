@@ -29,8 +29,8 @@ class FilmControllerTests {
         UserStorage userStorage = new InMemoryUserStorage();
         UserService userService = new UserService(userStorage);
         FilmService filmService = new FilmService(filmStorage, userService);
-        filmController = new FilmController(filmStorage, filmService);
-        userController = new UserController(userStorage, userService);
+        filmController = new FilmController(filmService);
+        userController = new UserController(userService);
 
     }
 
