@@ -14,19 +14,23 @@ import java.util.Set;
 @Data
 @Builder(toBuilder = true)
 public class Film {
-    Long id;
+    private Long id;
 
     @NotBlank(message = "Название не может быть пустым")
-    String name;
+    private String name;
 
     @Size(max = 200, message = "Максимальная длина описания — 200 символов")
-    String description;
+    private String description;
 
     @ValidReleaseDate
-    LocalDate releaseDate;
+    private LocalDate releaseDate;
 
     @Positive(message = "Продолжительность фильма должна быть положительным числом")
-    int duration;
+    private int duration;
 
-    final Set<Long> likes = new HashSet<>();
+    private final Set<Long> likes = new HashSet<>();
+
+    private Set<Genre> genre;
+
+    private MpaRating mpaRating;
 }
