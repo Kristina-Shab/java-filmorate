@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.yandex.practicum.filmorate.exception.DbException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
@@ -43,5 +44,12 @@ public class ErrorHandler {
                 .orElse("Ошибка валидации");
         log.warn("Ошибка валидации: {}", message);
         return new ErrorResponse("Ошибка валидации", message);
+    }
+
+    @ExceptionHandler(DbException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleDbException(DbException e) {
+        log.error("Ошибка базы данных: {}", e.getMessage(), e);
+        return new ErrorResponse("Ошибка базы данных", e.getMessage());
     }
 }

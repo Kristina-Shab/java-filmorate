@@ -1,9 +1,8 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.annotation.ValidReleaseDate;
 
@@ -11,8 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@Builder(toBuilder = true)
-public class Film {
+public class FilmUpdateRequestDto {
     private Long id;
 
     @NotBlank(message = "Название не может быть пустым")
@@ -27,7 +25,7 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть положительным числом")
     private int duration;
 
-    private List<Long> genre;
+    private MpaDto mpa;
 
-    private Integer mpaRatingId;
+    private List<GenreRequestDto> genres;
 }
