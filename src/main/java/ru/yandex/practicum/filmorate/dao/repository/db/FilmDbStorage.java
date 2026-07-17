@@ -62,7 +62,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         update(
                 UPDATE_QUERY,
                 newFilm.getName(),
-                newFilm.getDuration(),
+                newFilm.getDescription(),
                 newFilm.getReleaseDate(),
                 newFilm.getDuration(),
                 newFilm.getMpaRatingId(),
