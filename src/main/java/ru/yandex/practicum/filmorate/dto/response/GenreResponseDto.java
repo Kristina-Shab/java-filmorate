@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder(toBuilder = true)
-public class GenreDto {
+public class GenreResponseDto {
     private Long id;
     private String name;
 }

@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-public class FilmCreatRequestDto {
+public class FilmCreateRequestDto {
     @NotBlank(message = "Название не может быть пустым")
     private String name;
 

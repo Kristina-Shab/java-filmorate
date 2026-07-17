@@ -9,10 +9,14 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.dao.mappers.GenreRowMapper;
 import ru.yandex.practicum.filmorate.dao.repository.db.FilmDbStorage;
+import ru.yandex.practicum.filmorate.exception.DbException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -20,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles("db")
 @JdbcTest
@@ -29,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         GenreRowMapper.class
 })
 @AutoConfigureTestDatabase
+@Sql(scripts = "/data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmDbStorageTest {
     private final FilmDbStorage filmStorage;
@@ -40,7 +46,7 @@ class FilmDbStorageTest {
                 .description("Test Description")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120)
-                .mpaRatingId(1)
+                .mpa(MpaRating.builder().id(1L).build())
                 .build();
     }
 
@@ -65,18 +71,20 @@ class FilmDbStorageTest {
         assertThat(created.getDescription()).isEqualTo("Test Description");
         assertThat(created.getReleaseDate()).isEqualTo(LocalDate.of(2000, 1, 1));
         assertThat(created.getDuration()).isEqualTo(120);
-        assertThat(created.getMpaRatingId()).isEqualTo(1);
+        assertThat(created.getMpa().getId()).isEqualTo(1L);
     }
 
     @Test
     void testCreateWithGenres() {
         Film film = createTestFilm().toBuilder()
-                .genre(List.of(1L, 2L))
+                .genres(List.of(Genre.builder().id(1L).build(), Genre.builder().id(2L).build()))
                 .build();
         Film created = filmStorage.create(film);
 
         assertThat(created.getId()).isNotNull();
-        assertThat(created.getGenre()).containsExactly(1L, 2L);
+        assertThat(created.getGenres())
+                .extracting(Genre::getId)
+                .containsExactly(1L, 2L);
 
         List<Long> genreIds = jdbcTemplate.queryForList(
                 "SELECT genre_id FROM film_genre WHERE film_id = ? ORDER BY genre_id",
@@ -133,14 +141,14 @@ class FilmDbStorageTest {
 
     @Test
     void testExistsMpaById() {
-        assertThat(filmStorage.existsMpaById(1)).isTrue();
-        assertThat(filmStorage.existsMpaById(999)).isFalse();
+        assertThat(filmStorage.existsMpaById(1L)).isTrue();
+        assertThat(filmStorage.existsMpaById(999L)).isFalse();
     }
 
     @Test
     void testExistsGenreById() {
-        assertThat(filmStorage.existsGenreById(1)).isTrue();
-        assertThat(filmStorage.existsGenreById(999)).isFalse();
+        assertThat(filmStorage.existsGenreById(1L)).isTrue();
+        assertThat(filmStorage.existsGenreById(999L)).isFalse();
     }
 
     @Test
@@ -208,9 +216,6 @@ class FilmDbStorageTest {
     void testUpdateNonExistentFilm() {
         Film film = createTestFilm().toBuilder().id(999L).build();
 
-        org.junit.jupiter.api.Assertions.assertThrows(
-                ru.yandex.practicum.filmorate.exception.DbException.class,
-                () -> filmStorage.update(film)
-        );
+        assertThrows(DbException.class, () -> filmStorage.update(film));
     }
 }

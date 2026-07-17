@@ -18,6 +18,8 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
     private static final String INSERT_QUERY = "INSERT INTO users(email, login, name, birthday)" +
             "VALUES (?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
+    private static final String USER_ID = "user_id";
+    private static final String FRIEND_ID = "friend_id";
 
     public UserDbStorage(JdbcTemplate jdbcTemplate, RowMapper<User> mapper) {
         super(jdbcTemplate, mapper);
@@ -55,41 +57,39 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
     }
 
     @Override
-    public Optional<User> getEntity(long id) {
+    public Optional<User> getEntity(Long id) {
         return getById(TABLE_USER, id);
     }
 
     @Override
     public boolean areFriends(Long userId, Long friendId) {
-        return existsRelation(TABLE_USER_FRIEND, "user_id", userId, "friend_id", friendId);
+        return existsRelation(TABLE_USER_FRIEND, USER_ID, userId, FRIEND_ID, friendId);
     }
 
     @Override
     public void addFriend(Long userId, Long friendId) {
-        addRelation(TABLE_USER_FRIEND, "user_id", userId, "friend_id", friendId);
+        addRelation(TABLE_USER_FRIEND, USER_ID, userId, FRIEND_ID, friendId);
     }
 
     @Override
     public void removeFriend(Long userId, Long friendId) {
-        removeRelation(TABLE_USER_FRIEND, "user_id", userId, "friend_id", friendId);
+        removeRelation(TABLE_USER_FRIEND, USER_ID, userId, FRIEND_ID, friendId);
     }
 
     @Override
     public Collection<User> getFriends(Long id) {
-        return getRelations(TABLE_USER_FRIEND, "user_id", id, TABLE_USER, "id", "friend_id");
+        return getRelations(TABLE_USER_FRIEND, USER_ID, id, TABLE_USER, "id", FRIEND_ID);
     }
 
     @Override
     public Collection<User> getCommonFriends(Long userId, Long otherUserId) {
         String sql = """
-                
-                    SELECT u.*
+                SELECT u.*
                 FROM users u
                 INNER JOIN user_friend uf1 ON u.id = uf1.friend_id AND uf1.user_id = ?
                 INNER JOIN user_friend uf2 ON u.id = uf2.friend_id AND uf2.user_id = ?
                 ORDER BY u.id
                 """;
-        return jdbcTemplate.query(sql, mapper, userId,
-                otherUserId);
+        return jdbcTemplate.query(sql, mapper, userId, otherUserId);
     }
 }

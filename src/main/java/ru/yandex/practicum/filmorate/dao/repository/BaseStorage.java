@@ -10,5 +10,5 @@ public interface BaseStorage<T> {
 
     T update(T newEntity);
 
-    Optional<T> getEntity(long id);
+    Optional<T> getEntity(Long id);
 }

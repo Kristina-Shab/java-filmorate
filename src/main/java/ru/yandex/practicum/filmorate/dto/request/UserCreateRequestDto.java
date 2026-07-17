@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.annotation.ValidLogin;
 import java.time.LocalDate;
 
 @Data
-public class UserCreatRequestDto {
+public class UserCreateRequestDto {
     @ValidLogin
     String login;
 

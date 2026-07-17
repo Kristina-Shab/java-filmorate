@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.dao.mappers;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +18,9 @@ public class FilmRowMapper implements RowMapper<Film> {
                 .description(resultSet.getString("description"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getInt("duration"))
-                .mpaRatingId(resultSet.getInt("mpa_rating_id"))
+                .mpa(MpaRating.builder()
+                        .id(resultSet.getLong("mpa_rating_id"))
+                        .build())
                 .build();
     }
 }

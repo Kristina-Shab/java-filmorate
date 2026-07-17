@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.dto.request.UserCreatRequestDto;
+import ru.yandex.practicum.filmorate.dto.request.UserCreateRequestDto;
 import ru.yandex.practicum.filmorate.dto.request.UserUpdateRequestDto;
 import ru.yandex.practicum.filmorate.dto.response.UserResponseDto;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -49,7 +49,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserResponseDto create(@Valid @RequestBody UserCreatRequestDto request) {
+    public UserResponseDto create(@Valid @RequestBody UserCreateRequestDto request) {
         return userService.create(request);
     }
 

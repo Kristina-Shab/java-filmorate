@@ -5,8 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder(toBuilder = true)
-public class MpaRatingDto {
-    private Integer id;
+public class MpaResponseDto {
+    private Long id;
     private String name;
-    private String description;
 }

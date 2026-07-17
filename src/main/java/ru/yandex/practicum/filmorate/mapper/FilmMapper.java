@@ -2,28 +2,36 @@ package ru.yandex.practicum.filmorate.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.filmorate.dto.request.FilmCreatRequestDto;
+import ru.yandex.practicum.filmorate.dto.request.FilmCreateRequestDto;
 import ru.yandex.practicum.filmorate.dto.request.FilmUpdateRequestDto;
-import ru.yandex.practicum.filmorate.dto.request.GenreRequestDto;
-import ru.yandex.practicum.filmorate.dto.request.MpaDto;
 import ru.yandex.practicum.filmorate.dto.response.FilmResponseDto;
+import ru.yandex.practicum.filmorate.dto.response.GenreResponseDto;
+import ru.yandex.practicum.filmorate.dto.response.MpaResponseDto;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 
+import java.util.ArrayList;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class FilmMapper {
-    public static Film mapToFilm(FilmCreatRequestDto dto) {
+    public static Film mapToFilm(FilmCreateRequestDto dto) {
         return Film.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .releaseDate(dto.getReleaseDate())
                 .duration(dto.getDuration())
-                .mpaRatingId(Optional.ofNullable(dto.getMpa()).map(MpaDto::getId).orElse(null))
-                .genre(Optional.ofNullable(dto.getGenres())
-                        .map(genres -> genres.stream()
-                                .map(GenreRequestDto::getId)
+                .mpa(Optional.ofNullable(dto.getMpa())
+                        .map(mpaDto -> MpaRating.builder()
+                                .id(mpaDto.getId())
+                                .build())
+                        .orElse(null))
+                .genres(Optional.ofNullable(dto.getGenres())
+                        .map(genreDtos -> genreDtos.stream()
+                                .map(genreDto -> Genre.builder()
+                                        .id(genreDto.getId())
+                                        .build())
                                 .toList())
                         .orElse(null))
                 .build();
@@ -36,12 +44,19 @@ public final class FilmMapper {
                 .description(film.getDescription())
                 .releaseDate(film.getReleaseDate())
                 .duration(film.getDuration())
-                .mpa(new MpaDto(film.getMpaRatingId()))
+                .mpa(film.getMpa() != null ? MpaResponseDto.builder()
+                        .id(film.getMpa().getId())
+                        .name(film.getMpa().getName())
+                        .build() : null)
+                .genres(new ArrayList<>())
                 .build();
 
-        if (film.getGenre() != null && !film.getGenre().isEmpty()) {
-            dto.setGenres(film.getGenre().stream()
-                    .map(GenreRequestDto::new)
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            dto.setGenres(film.getGenres().stream()
+                    .map(genre -> GenreResponseDto.builder()
+                            .id(genre.getId())
+                            .name(genre.getName())
+                            .build())
                     .toList());
         }
 
@@ -54,7 +69,18 @@ public final class FilmMapper {
                 .description(dto.getDescription())
                 .releaseDate(dto.getReleaseDate())
                 .duration(dto.getDuration())
-                .mpaRatingId(Optional.ofNullable(dto.getMpa()).map(MpaDto::getId).orElse(null))
+                .mpa(Optional.ofNullable(dto.getMpa())
+                        .map(mpaDto -> MpaRating.builder()
+                                .id(mpaDto.getId())
+                                .build())
+                        .orElse(null))
+                .genres(Optional.ofNullable(dto.getGenres())
+                        .map(genresDto -> genresDto.stream()
+                                .map(genreDto -> Genre.builder()
+                                        .id(genreDto.getId())
+                                        .build())
+                                .toList())
+                        .orElse(existingFilm.getGenres()))
                 .build();
     }
 }

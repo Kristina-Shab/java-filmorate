@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.dto.request.FilmCreatRequestDto;
+import ru.yandex.practicum.filmorate.dto.request.FilmCreateRequestDto;
 import ru.yandex.practicum.filmorate.dto.request.FilmUpdateRequestDto;
 import ru.yandex.practicum.filmorate.dto.response.FilmResponseDto;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -45,7 +45,7 @@ public class FilmController {
     }
 
     @PostMapping
-    public FilmResponseDto create(@Valid @RequestBody FilmCreatRequestDto request) {
+    public FilmResponseDto create(@Valid @RequestBody FilmCreateRequestDto request) {
         return filmService.create(request);
     }
 

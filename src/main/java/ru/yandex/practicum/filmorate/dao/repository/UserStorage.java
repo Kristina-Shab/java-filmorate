@@ -5,11 +5,11 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
 
 public interface UserStorage extends BaseStorage<User> {
-    boolean areFriends(Long id1, Long id2);
+    boolean areFriends(Long userId, Long friendId);
 
-    void addFriend(Long id1, Long id2);
+    void addFriend(Long userId, Long friendId);
 
-    void removeFriend(Long id1, Long id2);
+    void removeFriend(Long userId, Long friendId);
 
     Collection<User> getFriends(Long id);
 

@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.repository.FilmStorage;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,11 +19,16 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     private static final String TABLE_MPA = "mpa_rating";
     private static final String TABLE_GENRE = "genre";
     private static final String TABLE_USER_FILM_LIKE = "user_film_like";
-    private static final String INSERT_QUERY = "INSERT INTO films(name, description, release_date, duration, mpa_rating_id)" +
-            "VALUES (?, ?, ?, ?, ?)";
+    private static final String INSERT_QUERY = "INSERT INTO films (name, description, release_date, duration, mpa_rating_id) VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, mpa_rating_id = ? WHERE id = ?";
     private static final String INSERT_FILM_GENRE = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
-    public static final String SELECT_TOP_FILMS = """
+    private static final String FIND_GENRES_BY_FILM_ID = """
+            SELECT g.* FROM genre g
+            JOIN film_genre fg ON g.id = fg.genre_id
+            WHERE fg.film_id = ?
+            ORDER BY g.id
+            """;
+    private static final String SELECT_TOP_FILMS = """
             SELECT f.*, COUNT(fl.user_id) AS likes_count
             FROM films f
             LEFT JOIN user_film_like fl ON f.id = fl.film_id
@@ -31,8 +37,11 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             LIMIT ?
             """;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, RowMapper<Film> mapper) {
+    private final RowMapper<Genre> genreRowMapper;
+
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, RowMapper<Film> mapper, RowMapper<Genre> genreRowMapper) {
         super(jdbcTemplate, mapper);
+        this.genreRowMapper = genreRowMapper;
     }
 
     @Override
@@ -48,11 +57,14 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getMpaRatingId()
+                film.getMpa().getId()
         );
         film.setId(id);
-        if (film.getGenre() != null && !film.getGenre().isEmpty()) {
-            saveGenres(film.getId(), film.getGenre());
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            List<Long> genreIds = film.getGenres().stream()
+                    .map(Genre::getId)
+                    .toList();
+            saveGenres(film.getId(), genreIds);
         }
         return film;
     }
@@ -65,40 +77,45 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                 newFilm.getDescription(),
                 newFilm.getReleaseDate(),
                 newFilm.getDuration(),
-                newFilm.getMpaRatingId(),
+                newFilm.getMpa().getId(),
                 newFilm.getId()
         );
         return newFilm;
     }
 
     @Override
-    public Optional<Film> getEntity(long id) {
+    public Optional<Film> getEntity(Long id) {
         return getById(TABLE_NAME, id);
     }
 
     @Override
-    public boolean existsMpaById(long id) {
+    public List<Genre> findGenresByFilmId(Long filmId) {
+        return jdbcTemplate.query(FIND_GENRES_BY_FILM_ID, genreRowMapper, filmId);
+    }
+
+    @Override
+    public boolean existsMpaById(Long id) {
         return existsById(TABLE_MPA, id);
     }
 
     @Override
-    public boolean existsGenreById(long id) {
+    public boolean existsGenreById(Long id) {
         return existsById(TABLE_GENRE, id);
     }
 
     @Override
-    public boolean isLikedByUser(Long id1, Long id2) {
-        return existsRelation(TABLE_USER_FILM_LIKE, "user_id", id1, "film_id", id2);
+    public boolean isLikedByUser(Long userId, Long filmId) {
+        return existsRelation(TABLE_USER_FILM_LIKE, "user_id", userId, "film_id", filmId);
     }
 
     @Override
-    public void addLike(Long id1, Long id2) {
-        addRelation(TABLE_USER_FILM_LIKE, "user_id", id1, "film_id", id2);
+    public void addLike(Long userId, Long filmId) {
+        addRelation(TABLE_USER_FILM_LIKE, "user_id", userId, "film_id", filmId);
     }
 
     @Override
-    public void removeLike(Long id1, Long id2) {
-        removeRelation(TABLE_USER_FILM_LIKE, "user_id", id1, "film_id", id2);
+    public void removeLike(Long userId, Long filmId) {
+        removeRelation(TABLE_USER_FILM_LIKE, "user_id", userId, "film_id", filmId);
     }
 
     @Override
@@ -106,11 +123,19 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         return jdbcTemplate.query(SELECT_TOP_FILMS, mapper, limit);
     }
 
-    private void saveGenres(long filmId, List<Long> genres) {
+    private void saveGenres(Long filmId, List<Long> genres) {
+        if (genres == null || genres.isEmpty()) {
+            return;
+        }
+
+        List<Long> uniqueGenres = genres.stream()
+                .distinct()
+                .toList();
+
         jdbcTemplate.batchUpdate(
                 INSERT_FILM_GENRE,
-                genres,
-                genres.size(),
+                uniqueGenres,
+                uniqueGenres.size(),
                 (ps, genreId) -> {
                     ps.setLong(1, filmId);
                     ps.setLong(2, genreId);

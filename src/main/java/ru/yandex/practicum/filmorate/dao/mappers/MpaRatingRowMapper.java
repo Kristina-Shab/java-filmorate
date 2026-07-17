@@ -12,7 +12,7 @@ public class MpaRatingRowMapper implements RowMapper<MpaRating> {
     @Override
     public MpaRating mapRow(ResultSet resultSet, int rowNum) throws SQLException {
         return MpaRating.builder()
-                .id(resultSet.getInt("id"))
+                .id(resultSet.getLong("id"))
                 .name(resultSet.getString("name"))
                 .build();
     }

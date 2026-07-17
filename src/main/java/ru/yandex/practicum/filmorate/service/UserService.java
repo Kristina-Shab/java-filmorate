@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.repository.UserStorage;
-import ru.yandex.practicum.filmorate.dto.request.UserCreatRequestDto;
+import ru.yandex.practicum.filmorate.dto.request.UserCreateRequestDto;
 import ru.yandex.practicum.filmorate.dto.request.UserUpdateRequestDto;
 import ru.yandex.practicum.filmorate.dto.response.UserResponseDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -31,17 +31,13 @@ public class UserService {
                 .toList();
     }
 
-    public UserResponseDto create(UserCreatRequestDto request) {
+    public UserResponseDto create(UserCreateRequestDto request) {
         User user = UserMapper.mapToUser(request);
         User savedUser = userStorage.create(user);
         return UserMapper.mapToUserResponseDto(savedUser);
     }
 
     public UserResponseDto update(UserUpdateRequestDto request) {
-        if (request.getId() == null) {
-            log.warn("Не указан id для обновления");
-            throw new ValidationException("Id должен быть указан");
-        }
         User updatedUser = userStorage.getEntity(request.getId())
                 .map(user -> UserMapper.updateUserFields(user, request))
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + request.getId() + " не найден"));
