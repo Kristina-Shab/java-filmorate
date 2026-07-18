@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.dao.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.dao.mappers.GenreRowMapper;
 import ru.yandex.practicum.filmorate.dao.repository.db.FilmDbStorage;
@@ -34,7 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         GenreRowMapper.class
 })
 @AutoConfigureTestDatabase
-@Sql(scripts = "/data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmDbStorageTest {
     private final FilmDbStorage filmStorage;
