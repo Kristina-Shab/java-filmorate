@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto.response;
 
 import lombok.Builder;
 import lombok.Data;
@@ -8,12 +8,12 @@ import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
-public class Film {
+public class FilmResponseDto {
     private Long id;
     private String name;
     private String description;
     private LocalDate releaseDate;
     private int duration;
-    private List<Genre> genres;
-    private MpaRating mpa;
+    private MpaResponseDto mpa;
+    private List<GenreResponseDto> genres;
 }

@@ -1,6 +1,7 @@
-package ru.yandex.practicum.filmorate.storage.film;
+package ru.yandex.practicum.filmorate.dao.repository.memory;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -12,15 +13,16 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class InMemoryFilmStorage implements FilmStorage {
+@Qualifier("inMemory")
+public class InMemoryFilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
 
-    @Override
+    //@Override
     public Collection<Film> findAll() {
         return films.values();
     }
 
-    @Override
+    //@Override
     public Film create(Film film) {
         log.info("Создание фильма {}", film.getName());
         film.setId(getNextId());
@@ -30,7 +32,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
-    @Override
+    //@Override
     public Film update(Film newFilm) {
         if (films.containsKey(newFilm.getId())) {
             log.info("Обновление фильма с id {}", newFilm.getId());
@@ -47,8 +49,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         throw new NotFoundException("Фильм с id = " + newFilm.getId() + " не найден");
     }
 
-    @Override
-    public Optional<Film> getFilm(long id) {
+    //@Override
+    public Optional<Film> getEntity(long id) {
         log.info("Получение фильма по id = {}", id);
         return Optional.ofNullable(films.get(id));
     }

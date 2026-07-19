@@ -1,6 +1,7 @@
-package ru.yandex.practicum.filmorate.storage.user;
+package ru.yandex.practicum.filmorate.dao.repository.memory;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -12,15 +13,16 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class InMemoryUserStorage implements UserStorage {
+@Qualifier("inMemory")
+public class InMemoryUserStorage {
     private final Map<Long, User> users = new HashMap<>();
 
-    @Override
+    //@Override
     public Collection<User> findAll() {
         return users.values();
     }
 
-    @Override
+    //@Override
     public User create(User user) {
         log.info("Создание нового пользователя с логином {}", user.getLogin());
         if (user.getName() == null || user.getName().isBlank()) {
@@ -34,7 +36,7 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
-    @Override
+    //@Override
     public User update(User newUser) {
         if (users.containsKey(newUser.getId())) {
             log.info("Обновление пользователя с id {}", newUser.getId());
@@ -58,8 +60,8 @@ public class InMemoryUserStorage implements UserStorage {
         throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
     }
 
-    @Override
-    public Optional<User> getUser(long id) {
+    //@Override
+    public Optional<User> getEntity(long id) {
         log.info("Поиск пользователя по id: {}", id);
         return Optional.ofNullable(users.get(id));
     }
