@@ -42,11 +42,3 @@ WHERE NOT EXISTS (SELECT 1 FROM mpa_rating WHERE name = 'R');
 INSERT INTO mpa_rating (name, description)
 SELECT 'NC-17', 'лицам до 18 лет просмотр запрещён' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM mpa_rating WHERE name = 'NC-17');
-
-
--- INSERT INTO mpa_rating (name, description)
--- VALUES ('G', 'у фильма нет возрастных ограничений'),
---        ('PG', 'детям рекомендуется смотреть фильм с родителями'),
---        ('PG-13', 'детям до 13 лет просмотр не желателен'),
---        ('R', 'лицам до 17 лет просматривать фильм можно только в присутствии взрослого'),
---        ('NC-17', 'лицам до 18 лет просмотр запрещён');

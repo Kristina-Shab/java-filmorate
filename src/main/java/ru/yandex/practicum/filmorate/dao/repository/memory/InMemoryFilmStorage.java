@@ -14,7 +14,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 @Qualifier("inMemory")
-public class InMemoryFilmStorage /*implements BaseStorage<Film> */ {
+public class InMemoryFilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
 
     //@Override

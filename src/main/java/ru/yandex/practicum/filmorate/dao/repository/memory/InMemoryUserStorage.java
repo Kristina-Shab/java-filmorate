@@ -14,7 +14,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 @Qualifier("inMemory")
-public class InMemoryUserStorage /*implements BaseStorage<User>*/ {
+public class InMemoryUserStorage {
     private final Map<Long, User> users = new HashMap<>();
 
     //@Override
